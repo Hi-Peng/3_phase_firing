@@ -64,7 +64,7 @@
 
 #define USBD_VID     1155
 #define USBD_LANGID_STRING     1033
-#define USBD_MANUFACTURER_STRING     "JPTE UNY"
+#define USBD_MANUFACTURER_STRING     "TE UNY"
 #define USBD_PID_FS     22336
 #define USBD_PRODUCT_STRING_FS     "ELDA 3 Phase Firing"
 #define USBD_CONFIGURATION_STRING_FS     "CDC Config"
