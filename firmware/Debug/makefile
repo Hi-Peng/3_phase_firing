@@ -9,10 +9,6 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include USB_DEVICE/Target/subdir.mk
--include USB_DEVICE/App/subdir.mk
--include Middlewares/ST/STM32_USB_Device_Library/Core/Src/subdir.mk
--include Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/subdir.mk
 -include Drivers/STM32F1xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
@@ -64,8 +60,8 @@ all: main-build
 main-build: 3_phase_firing.elf secondary-outputs
 
 # Tool invocations
-3_phase_firing.elf 3_phase_firing.map: $(OBJS) $(USER_OBJS) /home/hipeng/3_phase_firing/firmware/STM32F103C6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "3_phase_firing.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/home/hipeng/3_phase_firing/firmware/STM32F103C6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="3_phase_firing.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+3_phase_firing.elf 3_phase_firing.map: $(OBJS) $(USER_OBJS) /home/hipenglp/Documents/3_phase_firing/firmware/STM32F103C6TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "3_phase_firing.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/home/hipenglp/Documents/3_phase_firing/firmware/STM32F103C6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="3_phase_firing.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

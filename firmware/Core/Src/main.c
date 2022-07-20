@@ -2,10 +2,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-// #include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32f1xx_hal_tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -25,6 +25,9 @@ TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 #define SCR_PULSE_WIDTH 1000
+int global_pulse_flag = 0;
+TIM_HandleTypeDef htim1;
+TIM_OnePulse_InitTypeDef OPConfig;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -32,6 +35,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
+void HAL_TIM_IC_CaptureCallback (TIM_HandleTypeDef * htim);
 void set_alpha(int alpha);
 /* USER CODE END PFP */
 
@@ -64,23 +68,31 @@ int main(void)
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	// MX_USB_DEVICE_Init();
 	MX_TIM1_Init();
+	/* USER CODE BEGIN 2 */
+	// HAL_OP_Init();
+	set_alpha(2500);
 	/* USER CODE END 2 */
-	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 300);
-	/* Infinite loop */
-	while(1){
-	/* USER CODE BEGIN WHILE
-		for(int i; i<5000;i++){
-			set_alpha(i);
-		}
-		set_alpha(0);*/
-	/* USER CODE END WHILE */
-	}
-	/* USER CODE BEGIN 3 */
-	/* USER CODE END 3 */
-}
 
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+	while (1)
+	{
+		/* USER CODE END WHILE */
+
+		/* USER CODE BEGIN 3 */
+		for(int i = 0; i < 10000; i++){
+			set_alpha(i);
+			HAL_Delay(2);
+		}
+
+		for(int i = 10000; i > 0; i--){
+			set_alpha(i);
+			HAL_Delay(2);
+		}
+		/* USER CODE END 3 */
+	}
+}
 /**
  * @brief System Clock Configuration
  * @retval None
@@ -89,7 +101,6 @@ void SystemClock_Config(void)
 {
 	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
 	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-	RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
 	/** Initializes the RCC Oscillators according to the specified parameters
 	 * in the RCC_OscInitTypeDef structure.
@@ -119,12 +130,6 @@ void SystemClock_Config(void)
 	{
 		Error_Handler();
 	}
-	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
-	PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL;
-	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-	{
-		Error_Handler();
-	}
 }
 
 /**
@@ -136,55 +141,78 @@ static void MX_TIM1_Init(void)
 {
 
 	/* USER CODE BEGIN TIM1_Init 0 */
-	/* USER CODE END TIM1_Init 0 */
-	TIM_OnePulse_InitTypeDef sConfigOP = {0};
 
+	/* USER CODE END TIM1_Init 0 */
+
+	TIM_MasterConfigTypeDef sMasterConfig = {0};
+	TIM_IC_InitTypeDef sConfigIC = {0};
 
 	/* USER CODE BEGIN TIM1_Init 1 */
+	__HAL_RCC_TIM1_CLK_ENABLE();
 	/* USER CODE END TIM1_Init 1 */
 	htim1.Instance = TIM1;
 	htim1.Init.Prescaler = 48-1;
 	htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim1.Init.Period = 0;
+	htim1.Init.Period = 3000;
 	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim1.Init.RepetitionCounter = 0;
-	htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
-
+	htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_IC_Init(&htim1) != HAL_OK)
+	{
+		Error_Handler();
+	}
 	if (HAL_TIM_OnePulse_Init(&htim1, TIM_OPMODE_SINGLE) != HAL_OK)
 	{
 		Error_Handler();
 	}
-
-	if (HAL_TIM_OnePulse_Init(&htim1, TIM_OPMODE_SINGLE) != HAL_OK)
-	  {
-	    /* Initialization Error */
-	    Error_Handler();
-	  }
-
-	sConfigOP.OCMode = TIM_OCMODE_PWM2;
-	sConfigOP.OCPolarity   = TIM_OCPOLARITY_HIGH;
-	sConfigOP.Pulse        = 1000;
-	sConfigOP.ICPolarity   = TIM_ICPOLARITY_RISING;
-	sConfigOP.ICSelection  = TIM_ICSELECTION_DIRECTTI;
-	sConfigOP.ICFilter     = 0;
-	sConfigOP.OCNPolarity  = TIM_OCNPOLARITY_HIGH;
-	sConfigOP.OCIdleState  = TIM_OCIDLESTATE_RESET;
-	sConfigOP.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-	if (HAL_TIM_OnePulse_ConfigChannel(&htim1, &sConfigOP, TIM_CHANNEL_1, TIM_CHANNEL_2) != HAL_OK)
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
 	{
 		Error_Handler();
 	}
-
-
+	sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+	sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+	sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+	sConfigIC.ICFilter = 0;
+	if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+	{
+		Error_Handler();
+	}
 	/* USER CODE BEGIN TIM1_Init 2 */
-	/* USER CODE END TIM1_Init 2 */
-	HAL_TIM_MspPostInit(&htim1);
+	if(HAL_TIM_Base_Init(&htim1) != HAL_OK){
+		Error_Handler();
+	}
 
-	if (HAL_TIM_OnePulse_Start(&htim1, TIM_CHANNEL_1) != HAL_OK)
-	  {
-	    /* Starting Error */
-	    Error_Handler();
-	  }
+
+
+	if(HAL_TIM_OnePulse_Init(&htim1, TIM_OPMODE_SINGLE) != HAL_OK){
+		Error_Handler();
+	}
+
+	OPConfig.OCMode = TIM_OCMODE_PWM2;
+	OPConfig.OCPolarity   = TIM_OCPOLARITY_HIGH;
+	OPConfig.Pulse        = 1000;
+	OPConfig.ICPolarity   = TIM_ICPOLARITY_RISING;
+	OPConfig.ICSelection  = TIM_ICSELECTION_DIRECTTI;
+	OPConfig.ICFilter     = 0;
+	OPConfig.OCNPolarity  = TIM_OCNPOLARITY_HIGH;
+	OPConfig.OCIdleState  = TIM_OCIDLESTATE_RESET;
+	OPConfig.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+
+	if(HAL_TIM_OnePulse_ConfigChannel(&htim1, &OPConfig, TIM_CHANNEL_1, TIM_CHANNEL_2) != HAL_OK){
+		Error_Handler();
+	}
+
+	if(HAL_TIM_Base_Start_IT(&htim1) != HAL_OK){
+		Error_Handler();
+	}
+
+	if(HAL_TIM_OnePulse_Start(&htim1, TIM_CHANNEL_1) != HAL_OK){
+		Error_Handler();
+	}
+	/* USER CODE END TIM1_Init 2 */
+
 }
 
 /**
@@ -214,9 +242,24 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+/*
+ * @brief Inisialisasi timer 1 untuk One Pulse mode pada channel 1
+ */
 void set_alpha(int alpha){
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, alpha);
 	__HAL_TIM_SET_AUTORELOAD(&htim1, (alpha+SCR_PULSE_WIDTH));
+}
+
+void HAL_TIM_TriggerCallback (TIM_HandleTypeDef * htim)
+{
+	if(htim -> Instance == TIM1)
+	{
+		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
+		{
+			global_pulse_flag++;
+
+		}
+	}
 }
 /* USER CODE END 4 */
 
@@ -227,6 +270,10 @@ void set_alpha(int alpha){
 void Error_Handler(void)
 {
 	/* USER CODE BEGIN Error_Handler_Debug */
+	while(1){
+		HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
+		HAL_Delay(500);
+	}
 	/* USER CODE END Error_Handler_Debug */
 }
 
