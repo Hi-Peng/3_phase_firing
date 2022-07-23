@@ -93,6 +93,7 @@ int main(void)
 		/* USER CODE END 3 */
 	}
 }
+
 /**
  * @brief System Clock Configuration
  * @retval None
@@ -153,10 +154,10 @@ static void MX_TIM1_Init(void)
 	htim1.Instance = TIM1;
 	htim1.Init.Prescaler = 48-1;
 	htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim1.Init.Period = 3000;
+	htim1.Init.Period = 0;
 	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim1.Init.RepetitionCounter = 0;
-	htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_IC_Init(&htim1) != HAL_OK)
 	{
 		Error_Handler();
@@ -184,7 +185,9 @@ static void MX_TIM1_Init(void)
 		Error_Handler();
 	}
 
-
+	if(HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2) != HAL_OK){
+		Error_Handler();
+	}
 
 	if(HAL_TIM_OnePulse_Init(&htim1, TIM_OPMODE_SINGLE) != HAL_OK){
 		Error_Handler();
@@ -208,7 +211,7 @@ static void MX_TIM1_Init(void)
 		Error_Handler();
 	}
 
-	if(HAL_TIM_OnePulse_Start(&htim1, TIM_CHANNEL_1) != HAL_OK){
+	if(HAL_TIM_OnePulse_Start_IT(&htim1, TIM_CHANNEL_1) != HAL_OK){
 		Error_Handler();
 	}
 	/* USER CODE END TIM1_Init 2 */
@@ -250,16 +253,9 @@ void set_alpha(int alpha){
 	__HAL_TIM_SET_AUTORELOAD(&htim1, (alpha+SCR_PULSE_WIDTH));
 }
 
-void HAL_TIM_TriggerCallback (TIM_HandleTypeDef * htim)
+void HAL_TIM_IC_CaptureCallback (TIM_HandleTypeDef * htim)
 {
-	if(htim -> Instance == TIM1)
-	{
-		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
-		{
-			global_pulse_flag++;
-
-		}
-	}
+	global_pulse_flag++;
 }
 /* USER CODE END 4 */
 
