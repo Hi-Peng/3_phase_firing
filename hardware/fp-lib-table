@@ -1,3 +1,4 @@
 (fp_lib_table
   (lib (name "logo_uny")(type "KiCad")(uri "/home/hipeng/3_phase_firing/libs/logo_uny")(options "")(descr ""))
+  (lib (name "Footprints")(type "KiCad")(uri "/home/hipeng/3_phase_firing/libs/Kicad-STM32-master/Footprints")(options "")(descr ""))
 )
