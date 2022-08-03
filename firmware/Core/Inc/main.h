@@ -59,10 +59,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define TRIAC_MODE_SELECT_PIN_Pin GPIO_PIN_9
-#define TRIAC_MODE_SELECT_PIN_GPIO_Port GPIOA
-#define SCR_MODE_SELECT_PIN_Pin GPIO_PIN_10
-#define SCR_MODE_SELECT_PIN_GPIO_Port GPIOA
+#define LED_Pin GPIO_PIN_13
+#define LED_GPIO_Port GPIOC
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
