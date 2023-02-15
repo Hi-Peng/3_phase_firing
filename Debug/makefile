@@ -60,8 +60,8 @@ all: main-build
 main-build: 3_phase_firing_stm32f401.elf secondary-outputs
 
 # Tool invocations
-3_phase_firing_stm32f401.elf 3_phase_firing_stm32f401.map: $(OBJS) $(USER_OBJS) /home/hipenglp/Documents/3_phase_firing/firmware/STM32F401CCUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "3_phase_firing_stm32f401.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/hipenglp/Documents/3_phase_firing/firmware/STM32F401CCUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="3_phase_firing_stm32f401.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+3_phase_firing_stm32f401.elf 3_phase_firing_stm32f401.map: $(OBJS) $(USER_OBJS) D:\Projects\Skripsi\Converter-Regulator\ Firmware\STM32F401CCUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "3_phase_firing_stm32f401.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Projects\Skripsi\Converter-Regulator Firmware\STM32F401CCUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="3_phase_firing_stm32f401.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
